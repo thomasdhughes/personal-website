@@ -90,9 +90,10 @@ projects:
     image: "https://bucket.thomasdhughes.com/trugive-20260225-085950.jpeg"
     description: "Worked alongside the unstoppable [Tobi Ayeni](https://www.linkedin.com/in/tobi-ayeni-18b363135/)! Tobi and I began this project in the spring of 2022 after learning 98% of corporate funds earmarked for donation matching go unused every year. In building the MVP of the platform, we had the opportunity to draw from the expertise of the employee engagement teams at The Walt Disney Company and Google, as well as the fundraising teams of City Harvest, The ACLU, and Planned Parenthood."
   - name: "iOS Games"
-    tagline: "Pig Or Pup, Swath, Swib"
+    tagline: "My career before my career"
+    date: "2015"
     image: "https://bucket.thomasdhughes.com/ios_games-20260225-085940.jpeg"
-    description: "After release, I was invited to Lunch with Luminaries at the E3 Gaming Conference in Los Angeles, where I had the chance to ask the biggest players in the gaming industry about their journey and hopes for the field (see my feature in the [Los Angeles Times](https://www.latimes.com/business/technology/la-fi-tn-e3-kanye-hololens-20150617-story.html))."
+    description: "After releasing three games to the Apple App Store as a middle schooler, I was invited to Lunch with Luminaries at the E3 Gaming Conference in Los Angeles, where I had the chance to ask the biggest players in the gaming industry about their journey and hopes for the field (see my feature in the [Los Angeles Times](https://www.latimes.com/business/technology/la-fi-tn-e3-kanye-hololens-20150617-story.html))."
 
 leadership:
   - name: "Petey Greene Program"
