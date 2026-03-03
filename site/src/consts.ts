@@ -7,11 +7,6 @@ export const SITE: Site = {
   NUM_PROJECTS_ON_HOMEPAGE: 3,
 };
 
-export const HOME: Metadata = {
-  TITLE: "Home",
-  DESCRIPTION: "Thomas Hughes - Computational Designer at Arcadis. Princeton '24. Schwarzman Scholar '25.",
-};
-
 export const WRITING: Metadata = {
   TITLE: "Projects & Writing",
   DESCRIPTION: "Long-form essays and explorations.",

@@ -4,7 +4,7 @@ import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import LineItem from "@components/LineItem.astro";
 import Link from "@components/Link.astro";
-import { SITE, HOME } from "@consts";
+import { SITE } from "@consts";
 
 const homeEntry = (await getEntry("pages", "home"))!;
 const { Content } = await render(homeEntry);
@@ -21,7 +21,7 @@ const notes = (await getCollection("notes"))
   .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
 ---
 
-<PageLayout title="Hi, I'm Thomas!" description={HOME.DESCRIPTION} image="https://bucket.thomasdhughes.com/headshot-20260302-171512.jpeg">
+<PageLayout title="Hi, I'm Thomas!" image="https://bucket.thomasdhughes.com/headshot-20260302-171512.jpeg">
   <Container>
     <div class="space-y-16">
       <!-- Hero -->
