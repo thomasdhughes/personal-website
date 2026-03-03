@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+  entry: CollectionEntry<"projects-and-writing"> | CollectionEntry<"notes">;
+}
+
+const { entry } = Astro.props;
+const slug = entry.data.slug || entry.slug;
+
+const date = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+}).format(entry.data.date);
+---
+
+<a href={`/${slug}`} class="group flex items-baseline gap-4 py-2 hover:text-[#1a1a1a] dark:hover:text-[#fafafa] transition-colors duration-300 ease-in-out">
+  <span class="text-sm text-[#1a1a1a]/50 dark:text-[#fafafa]/50 shrink-0 w-[4.5rem]">
+    {date}
+  </span>
+  <span class="flex flex-col min-w-0">
+    <span class="font-semibold group-hover:underline underline-offset-2">
+      {entry.data.title}
+    </span>
+    {entry.data.description && (
+      <span class="text-sm text-[#1a1a1a]/60 dark:text-[#fafafa]/60">
+        {entry.data.description}
+      </span>
+    )}
+  </span>
+</a>

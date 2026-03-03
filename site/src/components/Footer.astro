@@ -1,0 +1,14 @@
+---
+import Container from "@components/Container.astro";
+import Link from "@components/Link.astro";
+import { SITE } from "@consts";
+---
+
+<footer class="animate">
+  <Container>
+    <div class="flex justify-between items-center">
+      <Link href={`mailto:${SITE.EMAIL}`}>{SITE.EMAIL}</Link>
+      <Link href="#top">↑ back to top</Link>
+    </div>
+  </Container>
+</footer>

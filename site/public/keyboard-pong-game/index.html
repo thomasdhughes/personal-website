@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keyboard Pong</title>
+    <!-- Confetti lib (small, no deps) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+      /* Page layout */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9fafb;
+      }
+
+      .wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      h1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0;
+        text-align: center;
+      }
+
+      canvas {
+        border: 2px solid #9ca3af;
+        border-radius: 1rem; /* ~rounded-2xl */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      p {
+        color: #4b5563; /* text-gray-600 */
+        max-width: 65ch;
+        text-align: center;
+        margin: 0;
+      }
+
+      kbd {
+        background: #f1f5f9;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+
+      /* Overlay for end‑game effects */
+      #overlay {
+        position: fixed;
+        inset: 0;
+        display: none; /* shown when game ends */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      #overlay.show {
+        display: flex;
+      }
+
+      #overlay h2 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0;
+        text-transform: uppercase;
+        -webkit-text-stroke: 1px #0003;
+      }
+
+      .blink {
+        animation: blink 1s step-end infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Tears */
+      .tear {
+        position: fixed;
+        top: -20px;
+        width: 6px;
+        height: 18px;
+        background: #60a5fa; /* blue‑500 */
+        border-radius: 50% 50% 40% 40%;
+        opacity: 0.9;
+        animation: fall 2.5s linear forwards;
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(110vh);
+          opacity: 0.2;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Keyboard Pong</h1>
+      <canvas id="gameCanvas"></canvas>
+      <p>
+        Slide your finger across the keyboard rows (<kbd>1 … =</kbd>,
+        <kbd>QWERTY</kbd>, <kbd>ASDF</kbd>, <kbd>ZXCV</kbd>) to move your paddle
+        around. First to 10 points wins!
+      </p>
+    </div>
+
+    <!-- End‑game overlay (hidden until needed) -->
+    <div id="overlay"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const overlay = document.getElementById("overlay");
+
+        // ─────────────────── Resize handling ───────────────────
+        function resize() {
+          canvas.width = Math.min(window.innerWidth * 0.9, 900);
+          canvas.height = Math.min(window.innerHeight * 0.7, 600);
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        // ─────────────────── Constants ───────────────────
+        const PADDLE_WIDTH = 100;
+        const PADDLE_HEIGHT = 12;
+        const BALL_RADIUS = 8;
+        const PLAYER_MOVE_DURATION = 100; // ms (0.1 s)
+        const SPEED_MULTIPLIER = 1.2;
+        const MAX_SCORE = 10;
+
+        // ─────────────────── Game objects ───────────────────
+        const player = {
+          x: canvas.width / 2,
+          y: canvas.height - PADDLE_HEIGHT * 2,
+          w: PADDLE_WIDTH,
+          h: PADDLE_HEIGHT,
+          targetX: null,
+          targetY: null,
+          startX: null,
+          startY: null,
+          moveStart: 0,
+        };
+
+        const ai = {
+          x: canvas.width / 2,
+          y: PADDLE_HEIGHT * 2,
+          w: PADDLE_WIDTH,
+          h: PADDLE_HEIGHT,
+        };
+
+        const ball = {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          dx: 4,
+          dy: 4,
+        };
+
+        let playerScore = 0;
+        let aiScore = 0;
+        let gameOver = false;
+        let animationFrameId = null;
+
+        // ─────────────────── Keyboard → "track‑pad" mapping ───────────────────
+        const keyRows = [
+          ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
+          ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],
+          ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'"],
+          ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
+        ];
+
+        /** Map a pressed key to an (x,y) inside the bottom half of the canvas */
+        function keyToPosition(key) {
+          key = key.toLowerCase();
+          let rowIdx = -1,
+            colIdx = -1;
+          for (let r = 0; r < keyRows.length; r++) {
+            const c = keyRows[r].indexOf(key);
+            if (c !== -1) {
+              rowIdx = r;
+              colIdx = c;
+              break;
+            }
+          }
+          if (rowIdx === -1) return null;
+          const row = keyRows[rowIdx];
+          const halfH = canvas.height / 2;
+          const rowH = halfH / keyRows.length;
+          const y = halfH + rowH * (rowIdx + 0.5);
+          const x = ((colIdx + 0.5) / row.length) * canvas.width;
+          return { x, y };
+        }
+
+        function handleKey(e) {
+          if (gameOver) return;
+          const pos = keyToPosition(e.key);
+          if (!pos) return;
+          // Start animation toward new position
+          player.startX = player.x;
+          player.startY = player.y;
+          player.targetX = pos.x;
+          player.targetY = pos.y;
+          player.moveStart = performance.now();
+        }
+
+        window.addEventListener("keydown", handleKey);
+
+        // ─────────────────── Core loop ───────────────────
+        function loop(timestamp) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // ─── Update: Ball ───
+          ball.x += ball.dx;
+          ball.y += ball.dy;
+
+          // Left/right walls
+          if (ball.x - BALL_RADIUS < 0 || ball.x + BALL_RADIUS > canvas.width) {
+            ball.dx *= -1;
+          }
+
+          // Scoring (top/bottom)
+          if (ball.y - BALL_RADIUS < 0) {
+            playerScore++;
+            if (playerScore >= MAX_SCORE) {
+              endGame(true);
+              return;
+            }
+            resetBall(4);
+          } else if (ball.y + BALL_RADIUS > canvas.height) {
+            aiScore++;
+            if (aiScore >= MAX_SCORE) {
+              endGame(false);
+              return;
+            }
+            resetBall(-4);
+          }
+
+          // Paddle collisions with speed boost
+          collidePaddle(player);
+          collidePaddle(ai);
+
+          // ─── Update: AI paddle ───
+          const targetX = ball.x;
+          const diff = targetX - ai.x;
+          const aiMax = 5;
+          ai.x += Math.max(-aiMax, Math.min(aiMax, diff));
+
+          // ─── Update: Player paddle animation ───
+          if (player.targetX !== null) {
+            const elapsed = timestamp - player.moveStart;
+            const t = Math.min(1, elapsed / PLAYER_MOVE_DURATION);
+            player.x = player.startX + (player.targetX - player.startX) * t;
+            player.y = player.startY + (player.targetY - player.startY) * t;
+            if (t === 1) {
+              player.targetX = player.targetY = null; // Done
+            }
+          }
+
+          // ─── Render ───
+          drawMidline();
+          drawPaddle(player, "#10b981"); // green
+          drawPaddle(ai, "#3b82f6"); // blue
+          drawBall();
+          drawHUD();
+
+          animationFrameId = requestAnimationFrame(loop);
+        }
+
+        // ─────────────────── Helpers ───────────────────
+        function resetBall(initialDY) {
+          ball.x = canvas.width / 2;
+          ball.y = canvas.height / 2;
+          ball.dx = Math.random() > 0.5 ? 4 : -4;
+          ball.dy = initialDY;
+        }
+
+        function collidePaddle(p) {
+          if (
+            ball.x + BALL_RADIUS > p.x - p.w / 2 &&
+            ball.x - BALL_RADIUS < p.x + p.w / 2 &&
+            ball.y + BALL_RADIUS > p.y - p.h / 2 &&
+            ball.y - BALL_RADIUS < p.y + p.h / 2 &&
+            (p === player ? ball.dy > 0 : ball.dy < 0)
+          ) {
+            // Reverse vertical direction
+            ball.dy *= -1;
+            // Slight horizontal control based on hit position
+            const offset = (ball.x - p.x) / (p.w / 2);
+            ball.dx += offset * 5;
+            // Accelerate!
+            ball.dx *= SPEED_MULTIPLIER;
+            ball.dy *= SPEED_MULTIPLIER;
+          }
+        }
+
+        function drawPaddle(p, color) {
+          ctx.fillStyle = color;
+          ctx.fillRect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h);
+        }
+
+        function drawBall() {
+          ctx.fillStyle = "#ef4444"; // red
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        function drawMidline() {
+          ctx.fillStyle = "#9ca3af";
+          ctx.fillRect(0, canvas.height / 2 - 1, canvas.width, 2);
+        }
+
+        function drawHUD() {
+          ctx.font = "20px monospace";
+          ctx.fillStyle = "#111827";
+          ctx.fillText(`${playerScore}`, 20, canvas.height / 2 + 30);
+          ctx.fillText(`${aiScore}`, 20, 30);
+        }
+
+        // ─────────────────── End‑game logic ───────────────────
+        function endGame(playerWon) {
+          gameOver = true;
+          cancelAnimationFrame(animationFrameId);
+          overlay.classList.add("show");
+          overlay.innerHTML = `<h2 class="blink" style="color:${
+            playerWon ? "#10b981" : "#ef4444"
+          }">${playerWon ? "You won!" : "You lost!"}</h2>`;
+
+          if (playerWon) {
+            // Burst confetti repeatedly for 3 seconds
+            const duration = 3000;
+            const end = Date.now() + duration;
+            (function frame() {
+              confetti({
+                particleCount: 70,
+                spread: 70,
+                origin: { y: 0.6 },
+              });
+              if (Date.now() < end) {
+                requestAnimationFrame(frame);
+              }
+            })();
+          } else {
+            // Tears: spawn droplets across screen for 3 seconds
+            const tearInterval = setInterval(() => {
+              const tear = document.createElement("div");
+              tear.className = "tear";
+              tear.style.left = Math.random() * window.innerWidth + "px";
+              document.body.appendChild(tear);
+              // Remove tear after animation
+              setTimeout(() => tear.remove(), 2500);
+            }, 100);
+            setTimeout(() => clearInterval(tearInterval), 3000);
+          }
+        }
+
+        // Start game!
+        animationFrameId = requestAnimationFrame(loop);
+
+        // Cleanup when unloading the page
+        window.addEventListener("beforeunload", () => {
+          window.removeEventListener("keydown", handleKey);
+          window.removeEventListener("resize", resize);
+        });
+      });
+    </script>
+  </body>
+</html>

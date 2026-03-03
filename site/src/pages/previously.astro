@@ -1,0 +1,314 @@
+---
+import { getEntry } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import Link from "@components/Link.astro";
+import { PREVIOUSLY } from "@consts";
+import { renderInlineMarkdown } from "@lib/utils";
+
+const prevEntry = (await getEntry("pages", "previously"))!;
+const { education, work, projects, leadership, speaking } = prevEntry.data;
+---
+
+<PageLayout title={PREVIOUSLY.TITLE} description={PREVIOUSLY.DESCRIPTION}>
+  <Container>
+    <div class="space-y-16">
+      <!-- Intro -->
+      <section class="animate">
+        <h1 class="text-3xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">
+          Previously
+        </h1>
+        <p class="mt-2 text-[#1a1a1a]/75 dark:text-[#fafafa]/75">
+          California &#8594; Princeton, NJ &#8594; Beijing, China &#8594; NYC
+        </p>
+      </section>
+
+      <!-- Education -->
+      {education && education.length > 0 && (
+        <section class="animate space-y-6">
+          <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">Education</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {education.map(edu => (
+              <div class="border-l-2 border-accent pl-4">
+                {edu.image && <img src={edu.image} alt={edu.name} class="rounded-md object-cover w-full max-h-48 mb-2" />}
+                <div class="font-semibold text-[#1a1a1a] dark:text-[#fafafa]">{edu.name}</div>
+                <div class="text-sm text-[#1a1a1a]/75 dark:text-[#fafafa]/75">{edu.detail}</div>
+                {edu.sub && (
+                  <div class="text-sm text-[#1a1a1a]/60 dark:text-[#fafafa]/60">{edu.sub}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Work -->
+      {work && work.length > 0 && (
+        <section class="animate space-y-4">
+          <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">Professional</h2>
+          <div class="prev-grid">
+            {work.map(item => (
+              <div class="prev-card" data-has-detail={item.description || item.image ? "true" : undefined}>
+                <button class="prev-header" aria-expanded="false">
+                  <div class="flex justify-between items-start w-full gap-2">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-[#1a1a1a] dark:text-[#fafafa] text-left">
+                        {item.url ? <Link href={item.url} external>{item.name}</Link> : item.name}
+                      </div>
+                      {item.role && <div class="text-sm text-[#1a1a1a]/75 dark:text-[#fafafa]/75 text-left">{item.role}</div>}
+                      {item.tagline && <div class="text-xs text-[#1a1a1a]/50 dark:text-[#fafafa]/50 mt-1 text-left">{item.tagline}</div>}
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      {item.date && <div class="text-sm text-[#1a1a1a]/60 dark:text-[#fafafa]/60">{item.date}</div>}
+                      <svg class="prev-chevron size-4 text-[#1a1a1a]/40 dark:text-[#fafafa]/40 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </div>
+                </button>
+                <div class="prev-detail">
+                  <div class="prev-detail-inner">
+                    {item.image && <img src={item.image} alt={item.name} class="card-img rounded-md object-cover" />}
+                    {item.description && <p class="text-sm" set:html={renderInlineMarkdown(item.description)} />}
+                    {item.links && item.links.length > 0 && (
+                      <div class="flex gap-2 text-sm">
+                        {item.links.map((link, i) => (
+                          <>
+                            {i > 0 && <span>·</span>}
+                            <Link href={link.url} external>{link.label}</Link>
+                          </>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Research -->
+      {projects && projects.length > 0 && (
+        <section class="animate space-y-4">
+          <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">Research</h2>
+          <div class="prev-grid">
+            {projects.map(item => (
+              <div class="prev-card" data-has-detail={item.description || item.image ? "true" : undefined}>
+                <button class="prev-header" aria-expanded="false">
+                  <div class="flex justify-between items-start w-full gap-2">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-[#1a1a1a] dark:text-[#fafafa] text-left">
+                        {item.url ? <Link href={item.url} external>{item.name}</Link> : item.name}
+                      </div>
+                      {item.role && <div class="text-sm text-[#1a1a1a]/75 dark:text-[#fafafa]/75 text-left">{item.role}</div>}
+                      {item.tagline && <div class="text-xs text-[#1a1a1a]/50 dark:text-[#fafafa]/50 mt-1 text-left">{item.tagline}</div>}
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      {item.date && <div class="text-sm text-[#1a1a1a]/60 dark:text-[#fafafa]/60">{item.date}</div>}
+                      <svg class="prev-chevron size-4 text-[#1a1a1a]/40 dark:text-[#fafafa]/40 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </div>
+                </button>
+                <div class="prev-detail">
+                  <div class="prev-detail-inner">
+                    {item.image && <img src={item.image} alt={item.name} class="card-img rounded-md object-cover" />}
+                    {item.description && <p class="text-sm" set:html={renderInlineMarkdown(item.description)} />}
+                    {item.links && item.links.length > 0 && (
+                      <div class="flex gap-2 text-sm">
+                        {item.links.map((link, i) => (
+                          <>
+                            {i > 0 && <span>·</span>}
+                            <Link href={link.url} external>{link.label}</Link>
+                          </>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Leadership & Service -->
+      {leadership && leadership.length > 0 && (
+        <section class="animate space-y-4">
+          <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">Leadership & Service</h2>
+          <div class="prev-grid">
+            {leadership.map(item => (
+              <div class="prev-card" data-has-detail={item.description || item.image ? "true" : undefined}>
+                <button class="prev-header" aria-expanded="false">
+                  <div class="flex justify-between items-start w-full gap-2">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-[#1a1a1a] dark:text-[#fafafa] text-left">
+                        {item.url ? <Link href={item.url} external>{item.name}</Link> : item.name}
+                      </div>
+                      {item.role && <div class="text-sm text-[#1a1a1a]/75 dark:text-[#fafafa]/75 text-left">{item.role}</div>}
+                      {item.tagline && <div class="text-xs text-[#1a1a1a]/50 dark:text-[#fafafa]/50 mt-1 text-left">{item.tagline}</div>}
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      {item.date && <div class="text-sm text-[#1a1a1a]/60 dark:text-[#fafafa]/60">{item.date}</div>}
+                      <svg class="prev-chevron size-4 text-[#1a1a1a]/40 dark:text-[#fafafa]/40 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </div>
+                </button>
+                <div class="prev-detail">
+                  <div class="prev-detail-inner">
+                    {item.image && <img src={item.image} alt={item.name} class="card-img rounded-md object-cover" />}
+                    {item.description && <p class="text-sm" set:html={renderInlineMarkdown(item.description)} />}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Speaking -->
+      {speaking && speaking.length > 0 && (
+        <section class="animate space-y-4">
+          <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">Speaking</h2>
+          <div class="prev-grid">
+            {speaking.map(item => (
+              <div class="prev-card">
+                <div class="prev-header-static p-4">
+                  <div class="flex justify-between items-start w-full">
+                    <div class="font-semibold text-[#1a1a1a] dark:text-[#fafafa]">{item.name}</div>
+                    {item.date && <div class="text-sm text-[#1a1a1a]/60 dark:text-[#fafafa]/60">{item.date}</div>}
+                  </div>
+                  {item.links && item.links.length > 0 && (
+                    <div class="mt-2 text-sm">
+                      {item.links.map(link => (
+                        <Link href={link.url} external>{link.label}</Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+    </div>
+
+    <style>
+      .prev-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        align-items: stretch;
+      }
+
+      .prev-grid.has-expanded {
+        align-items: start;
+      }
+
+      @media (max-width: 640px) {
+        .prev-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .prev-card {
+        border-radius: 0.5rem;
+        background: rgb(26 26 26 / 0.05);
+        overflow: hidden;
+      }
+
+      :global(.dark) .prev-card {
+        background: rgb(250 250 250 / 0.05);
+      }
+
+      .prev-header {
+        display: flex;
+        width: 100%;
+        padding: 1rem;
+        cursor: pointer;
+        text-align: left;
+        background: none;
+        border: none;
+        color: inherit;
+        font: inherit;
+      }
+
+      .prev-card:not([data-has-detail]) .prev-header {
+        cursor: default;
+      }
+
+      .prev-card:not([data-has-detail]) .prev-chevron {
+        display: none;
+      }
+
+      .prev-detail {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.3s ease;
+        padding: 0 1rem;
+      }
+
+      .prev-detail-inner {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .prev-card.expanded .prev-detail {
+        grid-template-rows: 1fr;
+      }
+
+      .prev-card.expanded .prev-detail-inner {
+        padding-bottom: 1rem;
+        gap: 0.75rem;
+      }
+
+      .prev-card.expanded .prev-chevron {
+        transform: rotate(180deg);
+      }
+
+      /* Image orientation handling */
+      .card-img {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        max-height: 240px;
+        width: 100%;
+      }
+      .prev-card[data-orient] .card-img {
+        opacity: 1;
+      }
+    </style>
+
+    <script>
+      document.addEventListener("astro:page-load", () => {
+        document.querySelectorAll('.prev-card[data-has-detail] .prev-header').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            // Don't toggle if clicking a link
+            if ((e.target as HTMLElement).closest('a')) return;
+
+            const card = btn.closest('.prev-card')!;
+            const grid = card.closest('.prev-grid')!;
+            const isExpanded = card.classList.contains('expanded');
+            card.classList.toggle('expanded');
+            btn.setAttribute('aria-expanded', String(!isExpanded));
+            grid.classList.toggle('has-expanded', !!grid.querySelector('.prev-card.expanded'));
+          });
+        });
+
+        // Image orientation detection
+        document.querySelectorAll('.prev-card .card-img').forEach((el) => {
+          const img = el as HTMLImageElement;
+          const classify = () => {
+            const card = img.closest('.prev-card');
+            if (!card) return;
+            const ratio = img.naturalWidth / img.naturalHeight;
+            if (ratio >= 1.2) (card as HTMLElement).dataset.orient = 'landscape';
+            else if (ratio <= 0.8) (card as HTMLElement).dataset.orient = 'portrait';
+            else (card as HTMLElement).dataset.orient = 'square';
+          };
+          if (img.complete && img.naturalWidth > 0) classify();
+          else img.addEventListener('load', classify);
+        });
+      });
+    </script>
+  </Container>
+</PageLayout>

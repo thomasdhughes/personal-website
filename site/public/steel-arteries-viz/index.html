@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYC Map</title>
+  <!-- Google Fonts import for Montserrat-->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div id="loading-screen">
+    <canvas id="loading-canvas"></canvas>
+    <div class="loading-content">
+      <!-- Larger title -->
+      <h1 class="title">Steel Arteries</h1>
+      <!-- Slightly smaller subtitle -->
+      <h1 class="subtitle">Visualizing Freight Flows in New York City</h1>
+      <p><b>Created by Thomas Hughes</b></p>
+      <p><b>with data from Davis III et al., 2023</b></p>
+      <br>
+      <p><em>Every day, 350,000 freight trucks traverse the city, making deliveries at all hours of the day and
+          night.</em></p>
+      <p><em>This map visualizes this truck activity, revealing the hidden rhythms of urban logistics.</em></p>
+      <br>
+      <p class="loading-label">Loading</p>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+  <div id="info-box">
+    <div id="time-display">
+      It is <span id="time-text">4:00 am</span> in New York City.
+    </div>
+
+    <div id="truck-count">
+      There are <span id="truck-number">0</span> freight trucks on the road, making
+      <select id="industry-select"></select>
+      possible.
+    </div>
+
+    <!-- AFTER – new controls -->
+    <div id="slider-container">
+      <button id="pause-btn" aria-label="Play/Pause">⏸</button>
+      <span class="slider-label">12:00 am</span>
+      <input type="range" id="time-slider" min="0" value="240">
+      <span class="slider-label">11:59 pm</span>
+    </div>
+  </div>
+
+  <!-- bottom-left container  -->
+  <div id="more-container">
+    <button id="more-btn">Tell&nbsp;me&nbsp;more</button>
+
+    <div id="more-panel">
+      Steel Arteries is a visualization of freight truck activity in the Big Apple, built on the synthetic dataset
+      created in the 2023 paper "<a
+        href="https://cip.tandoncsmart.com/uploads/1694025758042-Chow_CityTruckRouteNetwork_2023.pdf"
+        target="_blank">Quantifying and Visualizing City Truck Route Network Efficiency Using a Virtual Testbed</a>" by
+      Davis III et al. These are the trucks and the drivers that make the city run.
+      <br><br>
+      To the original researchers: thank you for creating such a rich dataset, and thank you for sharing it with the
+      world!
+      <br><br>
+      Tips:
+      <ul>
+        <li>Click any neighborhood to see how many trucks are driving through it</li>
+        <li>Click the <b>any industry</b> drop-down to see the flow of freight trucks for a specific industry</li>
+        <li>Click and drag the timeline to change the time of day</li>
+      </ul>
+      <br>
+      For more info on why and how this came together, check out the
+      <a href="https://infrastructure.bearblog.dev/steel-arteries/" target="_blank">blog post</a>.
+      <br><br>
+      Created by Thomas Hughes
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

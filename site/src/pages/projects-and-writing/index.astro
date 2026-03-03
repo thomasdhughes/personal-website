@@ -1,0 +1,39 @@
+---
+import { getCollection } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import LineItem from "@components/LineItem.astro";
+import { WRITING } from "@consts";
+
+const entries = (await getCollection("projects-and-writing"))
+  .filter(entry => !entry.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<PageLayout title={WRITING.TITLE} description={WRITING.DESCRIPTION}>
+  <Container>
+    <div class="space-y-10">
+      <div class="animate">
+        <h1 class="text-3xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">
+          Projects & Writing
+        </h1>
+        <p class="mt-2 text-[#1a1a1a]/75 dark:text-[#fafafa]/75">
+          {WRITING.DESCRIPTION}
+        </p>
+      </div>
+      {entries.length > 0 ? (
+        <ul class="animate flex flex-col">
+          {entries.map(entry => (
+            <li>
+              <LineItem entry={entry} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="animate text-[#1a1a1a]/50 dark:text-[#fafafa]/50">
+          Coming soon...
+        </p>
+      )}
+    </div>
+  </Container>
+</PageLayout>

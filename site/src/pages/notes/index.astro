@@ -1,0 +1,39 @@
+---
+import { getCollection } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import LineItem from "@components/LineItem.astro";
+import { NOTES } from "@consts";
+
+const notes = (await getCollection("notes"))
+  .filter(post => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<PageLayout title={NOTES.TITLE} description={NOTES.DESCRIPTION}>
+  <Container>
+    <div class="space-y-10">
+      <div class="animate">
+        <h1 class="text-3xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">
+          Notes
+        </h1>
+        <p class="mt-2 text-[#1a1a1a]/75 dark:text-[#fafafa]/75">
+          {NOTES.DESCRIPTION}
+        </p>
+      </div>
+      {notes.length > 0 ? (
+        <ul class="animate flex flex-col">
+          {notes.map(post => (
+            <li>
+              <LineItem entry={post} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="animate text-[#1a1a1a]/50 dark:text-[#fafafa]/50">
+          Notes coming soon...
+        </p>
+      )}
+    </div>
+  </Container>
+</PageLayout>

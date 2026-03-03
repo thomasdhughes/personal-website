@@ -1,0 +1,367 @@
+:root {
+  --bg-dark: #121212;
+  --text-beige: #f5f0e1;
+  --font-family: 'Georgia', serif;
+}
+
+html,
+body,
+#map {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#info-box {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  /* remove background & border lines */
+}
+
+/* (b) Beige Georgia with a thin black outline */
+#time-display,
+#truck-count,
+#truck-count select {
+  font-family: var(--font-family);
+  color: var(--text-beige);
+  /* 1-px faux stroke via text-shadow (works in every browser) */
+  text-shadow:
+    -1px -1px 0 #000, 1px -1px 0 #000,
+    -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+/* ---------- fixed-width “info” badges ---------- */
+#time-display {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* fixed-width badge for the hh:mm am/pm text */
+#time-text {
+  display: inline-block;
+  width: 8ch;
+  /* fits “11:59 pm” */
+  padding: 2px 6px;
+  text-align: center;
+
+  border: 1px solid #fff;
+  border-radius: 6px;
+  box-sizing: border-box;
+
+  font-variant-numeric: tabular-nums;
+}
+
+/* the numeric truck count gets the same treatment */
+#truck-number {
+  display: inline-block;
+  width: 8ch;
+  padding: 2px 6px;
+  text-align: right;
+
+  border: 1px solid #fff;
+  border-radius: 6px;
+  box-sizing: border-box;
+
+  /* makes every digit the same width so the value never wobbles */
+  font-variant-numeric: tabular-nums;
+}
+
+#truck-count {
+  font-size: 16px;
+  margin-top: 2px
+}
+
+/* Existing popup styling */
+.leaflet-popup-content-wrapper {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  font-family: var(--font-family);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.popup-content {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.popup-title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #ffd700;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-dark);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+#loading-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  /* put behind .loading-content */
+  opacity: 0.5;
+}
+
+/* ---------------------------------------------
+   Use beige text and Georgia font
+---------------------------------------------- */
+.loading-content {
+  text-align: center;
+  font-family: var(--font-family);
+  color: var(--text-beige);
+  line-height: 1.4;
+}
+
+/* ---------------------------------------------
+   Larger title, slightly smaller subtitle
+---------------------------------------------- */
+.loading-content h1.title {
+  font-size: 30px;
+  /* bigger title */
+  margin-bottom: 0.5em;
+  /* spacing */
+  color: var(--text-beige);
+  font-weight: 700;
+}
+
+.loading-content h1.subtitle {
+  font-size: 26px;
+  /* slightly smaller */
+  margin-bottom: 2em;
+  /* spacing below subtitle */
+  color: var(--text-beige);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------
+   Paragraph style
+---------------------------------------------- */
+.loading-content p {
+  font-size: 18px;
+  margin: 0.5em 0;
+  color: var(--text-beige);
+}
+
+.loading-content a {
+  text-decoration: underline;
+  color: var(--text-beige);
+}
+
+/* ---------------------------------------------
+   Loading label and progress bar
+---------------------------------------------- */
+.loading-label {
+  margin-top: 16px;
+  margin-bottom: 4px;
+  font-weight: bold;
+  color: var(--text-beige);
+}
+
+.progress-bar {
+  width: 200px;
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--text-beige);
+  transition: width 0.3s ease;
+}
+
+#pause-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  color: var(--text-beige);
+  background: transparent;
+  border: 1px solid var(--text-beige);
+  border-radius: 4px;
+}
+
+/* spinning loader while data is fetching */
+#pause-btn.loading {
+  border: 3px solid var(--text-beige);
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg)
+  }
+}
+
+
+/* inline dropdown that matches the text */
+#industry-select {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 2px 4px;
+  font-size: 16px;
+  font-family: var(--font-family);
+  color: var(--text-beige);
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid var(--text-beige);
+  border-radius: 4px;
+  vertical-align: baseline;
+}
+
+#time-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--text-beige);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+#slider-container {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-family);
+  color: var(--text-beige);
+}
+
+#slider-container .slider-label {
+  font-size: 14px
+}
+
+#time-slider {
+  width: 160px;
+  /* short bar fits under the text */
+  flex: 0 0 160px;
+}
+
+/* ---------- More-info toggle ---------- */
+#more-btn {
+  margin-top: 6px;
+  padding: 2px 8px;
+  font-family: var(--font-family);
+  color: var(--text-beige);
+  background: transparent;
+  border: 1px solid var(--text-beige);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* collapsible panel */
+#more-panel {
+  margin-top: 6px;
+  width: 260px;
+  /* width of the headline area */
+  max-height: 0;
+  overflow: hidden;
+  background: #333;
+  /* gray background */
+  color: var(--text-beige);
+  border: 1px solid var(--text-beige);
+  border-radius: 4px;
+  transition: max-height .4s ease;
+  padding: 0 8px;
+  /* will apply after expansion */
+  box-sizing: border-box;
+}
+
+#more-panel.open {
+  max-height: 70vh;
+  /* unfurls up left side */
+  padding: 8px;
+  /* reveal inner padding */
+}
+
+#more-panel ul {
+  margin: 0;
+  padding-left: 18px
+}
+
+#more-panel li {
+  margin: 4px 0;
+  font-size: 14px
+}
+
+#more-panel a {
+  color: var(--text-beige);
+  text-decoration: underline
+}
+
+/* ---------- bottom-left placement ---------- */
+#more-container {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column-reverse;
+  /* button at the very bottom */
+  align-items: flex-start;
+}
+
+/* collapsed state — no border, so no stray white lines */
+#more-panel {
+  margin-bottom: 6px;
+  /* small gap above the button */
+  width: 350px;
+  max-height: 0;
+  overflow: hidden;
+  background: #333;
+  color: var(--text-beige);
+  border: none;
+  /* remove border that was showing as a line */
+  border-radius: 4px;
+  transition: max-height .4s ease;
+  padding: 0 8px;
+  /* appears only when open */
+  box-sizing: border-box;
+}
+
+/* open state — bring the border back */
+#more-panel.open {
+  max-height: 70vh;
+  padding: 8px;
+  border: 1px solid var(--text-beige);
+}
+
+
+/* the button hugs the corner */
+#more-btn {
+  margin-top: 0
+}

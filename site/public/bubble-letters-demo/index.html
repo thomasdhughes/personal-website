@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live ASCII Bubble‑Letters</title>
+  <style>
+    :root { --cell: 12px; }
+    body { font-family: monospace; display:flex; flex-direction:column; align-items:center; gap:1rem; padding:1rem; }
+    #ascii { white-space: pre; font-size: var(--cell); line-height: var(--cell); margin:0; text-align:left; }
+    #textInput { font-size:1rem; padding:0.5rem 0.75rem; width:min(80%,400px); }
+  </style>
+</head>
+<body>
+  <input id="textInput" placeholder="Type here…" autocomplete="off" />
+  <button id="exportBtn">Create link</button>
+  <pre id="ascii"></pre>
+
+  <script>
+    /*
+      Full A–Z 6‑row bubble‑style ASCII font plus common punctuation.
+    */
+
+    const FONT_HEIGHT = 6;
+
+    const FONT = {
+      ' ': [`       `, `       `, `       `, `       `, `       `, `       `],
+      'A': [ `  ___  `, ` / _ \\ `, `/ /_\\ \\`, `|  _  |`, `| | | |`, `\\_| |_/` ],
+      'B': [ `______ `, `| ___ \\`, `| |_/ /`, `| ___ \\`, `| |_/ /`, `\\____/ ` ],
+      'C': [ ` _____ `, `/  __ \\`, `| /  \\`, `| |    `, `| \\__/\\`, ` \\____/` ],
+      'D': [ `______ `, `|  _  \\`, `| | | |`, `| | | |`, `| |/ / `, `|___/  ` ],
+      'E': [ ` _____ `, `|  ___|`, `| |__  `, `|  __| `, `| |___ `, `\\____/ ` ],
+      'F': [ `______ `, `|  ___|`, `| |_   `, `|  _|  `, `| |    `, `\\_|    ` ],
+      'G': [ ` _____ `, `|  __ \\`, `| |  \\`, `| | __ `, `| |_\\ \\`, ` \\____/` ],
+      'H': [ ` _   _ `, `| | | |`, `| |_| |`, `|  _  |`, `| | | |`, `\\_| |_/` ],
+      'I': [ ` _____ `, `|_   _|`, `  | |  `, `  | |  `, ` _| |_ `, `|_____|` ],
+      'J': [ `     _ `, `    | |`, `    | |`, `    | |`, `/\\__/ |`, `\\____/ ` ],
+      'K': [ `_   __ `, `| | / /`, `| |/ / `, `|    \\`, `| |\\  \\`, `\\_| \\_/` ],
+      'L': [ ` _      `, `| |     `, `| |     `, `| |     `, `| |____ `, `\\_____/` ],
+      'M': [ `___  ___`, `|  \\/  |`, `| .  . |`, `| |\\/| |`, `| |  | |`, `\\_|  |_/` ],
+      'N': [ ` _   _ `, `| \\ | |`, `|  \\| |`, '| . ` |', `| |\\  |`, `\\_| \\_/` ],
+      'O': [ ` _____ `, `|  _  |`, `| | | |`, `| | | |`, `| |_| |`, ` \\___/ ` ],
+      'P': [ `______ `, `| ___ \\`, `| |_/ /`, `|  __/ `, `| |    `, `\\_|    ` ],
+      'Q': [ ` _____ `, `|  _  |`, `| | | |`, `| | | |`, `| |/ / `, `|___/\\_\\` ],
+      'R': [ `______ `, `| ___ \\`, `| |_/ /`, `|    / `, `| |\\ \\`, `\\_| \\_|` ],
+      'S': [ ' _____ ', '/  ___|', '\\ `--. ', ' `--. \\', '/\\__/ /', '\\____/ ' ],
+      'T': [ `_______`, `|__   __|`, `   | |   `, `   | |   `, `   | |   `, `   \\_/   ` ],
+      'U': [ ` _   _ `, `| | | |`, `| | | |`, `| | | |`, `| |_| |`, ` \\___/ ` ],
+      'V': [ `__     __`, `\\ \\   / /`, ` \\ \\ / / `, `  \\ V /  `, `   \\_/   `, `         ` ],
+      'W': [ `__        __`, `\\ \\      / /`, ` \\ \\ /\\ / / `, `  \\ V  V /  `, `   \\_/\\_/   `, `              ` ],
+      'X': [ `__   __`, `\\ \\ / /`, ` \\ V / `, ` /   \\`, `/ /^\\ \\`, `\\/   \\/` ],
+      'Y': [ `__   __`, `\\ \\ / /`, ` \\ V / `, `  \\ /  `, `  | |  `, `  \\_/  ` ],
+      'Z': [ ` ______`, `|___  /`, `   / / `, `  / /  `, `./ /___`, `\\_____/` ],
+
+      // Punctuation
+      '.': [ `       `, `       `, `       `, `       `, `   ___   `, `  (___)  ` ],
+      ',': [ `       `, `       `, `       `, `       `, `   ___   `, ` /(___)  ` ],
+      '!': [ `   _   `, `  | |  `, `  | |  `, `  | |  `, `  |_|  `, `  (_)  ` ],
+      '?': [ ` `, ` `, ` `, `?`, ` `, ` `, ],
+      ':': [ `       `, `   ___   `, `  (___)  `, `       `, `   ___   `, `  (___)  ` ],
+      ';': [ `       `, `   ___   `, `  (___)  `, `       `, `   ___   `, ` /(___)  ` ],
+      "'": [ `   _   `, `  ( )  `, `   \|  `, `       `, `       `, `       ` ],
+      '"': [ `  _ _  `, ` ( | ) `, `  \|/  `, `       `, `       `, `       ` ],
+      '-': [ `       `, `       `, ` ______ `, `|______|`, `       `, `       ` ],
+      '_': [ `       `, `       `, `       `, `       `, ` ______ `, `|______|` ]
+    };
+
+    // Determine max glyph width
+    const GLYPH_WIDTH = Object.values(FONT)
+      .flat()
+      .reduce((max, row) => Math.max(max, row.length), 0);
+
+    function colsPerLine () {
+      /* measure the real pixel width of one “monospace” cell */
+      const probe = document.createElement('span');
+      probe.textContent = 'M'.repeat(100);                // long → better precision
+      probe.style.cssText = `
+        position:fixed; visibility:hidden; white-space:pre;
+        font:normal var(--cell) monospace`;
+      document.body.appendChild(probe);
+      const charW   = probe.getBoundingClientRect().width / 100;
+      const pageW   = document.documentElement.clientWidth -
+                      32;                                // pad left/right ≈ 1 rem
+      document.body.removeChild(probe);
+      return Math.max(1, Math.floor(pageW / charW));     // never 0
+    }
+
+    function generateWrapped (txt) {
+      const limit        = colsPerLine();                // columns that fit
+      let   rows         = Array(FONT_HEIGHT).fill('');  // current screen line
+      let   currentWidth = 0;                            // columns used so far
+      const outLines     = [];                           // finished screen lines
+
+      for (const word of txt.split(/\s+/)) {             // “word” = token between spaces
+        if (!word) continue;                             // ignore repeated spaces
+
+        /* build the glyphs for this word once --------------------------- */
+        const wordRows = Array(FONT_HEIGHT).fill('');
+        for (const ch of word) {
+          const g = FONT[ch.toUpperCase()] || FONT[' '];
+          for (let r = 0; r < FONT_HEIGHT; r++)
+            wordRows[r] += g[r].padEnd(GLYPH_WIDTH, ' ');
+        }
+        const wordWidth = word.length * GLYPH_WIDTH;     // in columns
+        const spaceHere = currentWidth ? GLYPH_WIDTH : 0;
+
+        /* need to start a new screen line? ------------------------------ */
+        if (currentWidth + spaceHere + wordWidth > limit) {
+          outLines.push(rows.join('\n'));                // commit previous line
+          rows         = Array(FONT_HEIGHT).fill('');
+          currentWidth = 0;
+        }
+
+        /* inter-word space (unless at start of line) -------------------- */
+        if (currentWidth) {
+          for (let r = 0; r < FONT_HEIGHT; r++)
+            rows[r] += FONT[' '][r].padEnd(GLYPH_WIDTH, ' ');
+          currentWidth += GLYPH_WIDTH;
+        }
+
+        /* append the word itself --------------------------------------- */
+        for (let r = 0; r < FONT_HEIGHT; r++) rows[r] += wordRows[r];
+        currentWidth += wordWidth;
+      }
+
+      outLines.push(rows.join('\n'));                    // last line
+      return outLines.join('\n');
+    }
+
+    // Live update + auto-reflow on window resize
+    const input  = document.getElementById('textInput');
+    const output = document.getElementById('ascii');
+    const exportBtn = document.getElementById('exportBtn');
+
+    /* --- “view-only” mode ------------------------------------------- */
+    const initial = new URLSearchParams(location.search).get('t');
+    if (initial !== null) {                 // a ?t=… parameter is present
+      input.value = decodeURIComponent(initial);
+      render();                             // draw once
+      input.remove();                       // hide the controls
+      exportBtn.remove();
+
+      const mk = document.createElement('button');
+      mk.textContent = 'Make your own';
+      mk.addEventListener('click', () => location.href = location.pathname);
+      mk.style.marginTop = '5rem';
+      document.body.appendChild(mk);
+    }
+
+    function render () { output.textContent = generateWrapped(input.value); }
+
+    input .addEventListener('input',  render);
+    window.addEventListener('resize', render);
+
+    render();  // initial empty banner
+
+    /* --- Export button ----------------------------------------------- */
+    exportBtn.addEventListener('click', () => {
+      const url =
+        location.origin + location.pathname +
+        '?t=' + encodeURIComponent(input.value.trim());
+      navigator.clipboard.writeText(url).then(() => {
+        exportBtn.textContent = '✔︎ Link copied';
+        setTimeout(() => {
+      exportBtn.textContent = 'Create link';
+    }, 2000); // revert after 2 seconds
+      });
+    });
+    
+  </script>
+</body>
+</html>

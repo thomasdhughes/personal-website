@@ -1,0 +1,108 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import LineItem from "@components/LineItem.astro";
+import Link from "@components/Link.astro";
+import { SITE, HOME } from "@consts";
+
+const homeEntry = (await getEntry("pages", "home"))!;
+const { Content } = await render(homeEntry);
+const { email, linkedin, x, bluesky, substack } = homeEntry.data;
+
+const writing = (await getCollection("projects-and-writing"))
+  .filter(entry => !entry.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+
+const notes = (await getCollection("notes"))
+  .filter(post => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+---
+
+<PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
+  <Container>
+    <div class="space-y-16">
+      <!-- Hero -->
+      <section class="animate">
+        <div class="space-y-4">
+          <div class="flex flex-col md:flex-row gap-8 items-end">
+            <div class="flex-shrink-0">
+              <img src="https://bucket.thomasdhughes.com/headshot-20260302-171512.jpeg" alt="Thomas Hughes" class="w-48 rounded-lg" />
+            </div>
+            <div class="space-y-4">
+              <h1 class="text-3xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">
+                Hi, I'm Thomas!
+              </h1>
+              <div class="flex flex-wrap gap-x-2 text-sm">
+                {email && <Link href={`mailto:${email}`}>Email</Link>}
+                {email && linkedin && <span>·</span>}
+                {linkedin && <Link href={linkedin} external>LinkedIn</Link>}
+                {linkedin && x && <span>·</span>}
+                {x && <Link href={x} external>X</Link>}
+                {x && bluesky && <span>·</span>}
+                {bluesky && <Link href={bluesky} external>Bluesky</Link>}
+                {bluesky && substack && <span>·</span>}
+                {substack && <Link href={substack} external>Substack</Link>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bio -->
+      <section class="animate space-y-4">
+        <article class="space-y-4">
+          <Content />
+        </article>
+      </section>
+
+      <!-- Recent Projects & Writing -->
+      {writing.length > 0 && (
+        <section class="animate space-y-6">
+          <div class="flex flex-wrap gap-y-2 items-center justify-between">
+            <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">
+              Recent Projects & Writing
+            </h2>
+            <Link href="/projects-and-writing">
+              See all
+            </Link>
+          </div>
+          <ul class="flex flex-col">
+            {writing.map(entry => (
+              <li>
+                <LineItem entry={entry} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <!-- Recent Notes -->
+      <section class="animate space-y-6">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+          <h2 class="text-xl font-bold text-[#1a1a1a] dark:text-[#fafafa]">
+            Recent Notes
+          </h2>
+          <Link href="/notes">
+            See all
+          </Link>
+        </div>
+        {notes.length > 0 ? (
+          <ul class="flex flex-col">
+            {notes.map(post => (
+              <li>
+                <LineItem entry={post} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-[#1a1a1a]/50 dark:text-[#fafafa]/50">
+            Notes coming soon...
+          </p>
+        )}
+      </section>
+    </div>
+  </Container>
+</PageLayout>

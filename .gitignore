@@ -1,0 +1,16 @@
+# Only track the site folder
+/*
+!site/
+!.github/
+!.gitignore
+!.claude/
+
+# OS files
+.DS_Store
+
+# Local setup/reference files
+notion-pictures/
+infrastructure-bearblog-posts/
+linkedin-grab/
+scraped-posts/
+notion_site_grab
