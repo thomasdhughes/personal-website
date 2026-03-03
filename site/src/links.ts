@@ -26,4 +26,5 @@ export const hostedDemos = [
   { slug: "steel-arteries-viz", repo: "thomasdhughes/nyc-freight-visualizer", branch: "gh-pages" },
   { slug: "keyboard-pong-game", repo: "thomasdhughes/keyboard-pong", branch: "gh-pages" },
   { slug: "bubble-letters-demo", repo: "thomasdhughes/bubble-letters", branch: "gh-pages" },
+  { slug: "csv-to-html-table", repo: "thomasdhughes/csv-to-html-table", branch: "main" },
 ];

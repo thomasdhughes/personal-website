@@ -20,6 +20,7 @@ const notes = defineCollection({
     date: z.coerce.date(),
     draft: z.boolean().optional(),
     slug: z.string().optional(),
+    link: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),
 });

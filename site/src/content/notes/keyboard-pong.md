@@ -2,11 +2,9 @@
 title: "Keyboard Pong"
 date: 2025-06-11
 slug: keyboard-pong
-description: "Experimenting with inputs."
+description: "Experimenting with inputs"
 tags: ["interactive", "games", "creative-coding"]
 ---
-
-Experimenting with inputs.
 
 Click on the game below before using your keyboard to play.
 

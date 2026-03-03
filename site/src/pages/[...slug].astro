@@ -39,7 +39,9 @@ export async function getStaticPaths() {
     track(entry.data.slug || entry.slug, `projectsAndWriting/${entry.slug}`);
   }
   for (const entry of notes) {
-    track(entry.data.slug || entry.slug, `notes/${entry.slug}`);
+    if (!entry.data.link) {
+      track(entry.data.slug || entry.slug, `notes/${entry.slug}`);
+    }
   }
 
   const collisions = Object.entries(slugSources).filter(([, sources]) => sources.length > 1);
@@ -56,10 +58,12 @@ export async function getStaticPaths() {
       params: { slug: entry.data.slug || entry.slug },
       props: { entry, collection: "projects-and-writing" as const },
     })),
-    ...notes.map((entry) => ({
-      params: { slug: entry.data.slug || entry.slug },
-      props: { entry, collection: "notes" as const },
-    })),
+    ...notes
+      .filter((entry) => !entry.data.link)
+      .map((entry) => ({
+        params: { slug: entry.data.slug || entry.slug },
+        props: { entry, collection: "notes" as const },
+      })),
   ];
 
   const redirectPaths = Object.entries(redirects).map(([slug, url]) => ({
